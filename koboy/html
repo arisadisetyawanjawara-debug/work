@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080808">
+<title>Western Cowboy — Demo Lobby</title>
+<style>
+:root{--black:#050505;--red:#ed0909;--red2:#c90000;--wine:#4b0000;--yellow:#ffd000;--yellow2:#ffb900;--white:#fff;--line:#e6b500}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--black);font-family:Arial,Helvetica,sans-serif;color:#fff}button,input,select{font:inherit}button{cursor:pointer}
+.page{display:none;min-height:100vh}.page.active{display:block}
+.logo{display:flex;align-items:center;justify-content:center;width:290px;height:58px;position:relative;flex-shrink:0}
+.logo img{display:block;max-width:100%;max-height:100%;object-fit:contain}
+.logo-slot{display:block;width:clamp(120px,30vw,270px);height:58px;flex:0 1 270px}
+.logo-slot {
+  display: block;
+  width: 250px;
+  height: 75px;
+  flex: 0 1 250px;
+  overflow: hidden;
+}
+
+.logo-slot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.register-header .logo-slot{position:absolute;left:50%;transform:translateX(-50%)}
+.logo-fallback{font-size:clamp(21px,4vw,34px);font-weight:1000;letter-spacing:-1.3px;color:#eee;text-shadow:2px 2px 0 #5b0000,-1px -1px #999;white-space:nowrap}
+.logo-fallback b{color:#e21b1b}
+.logo-fallback small{display:block;font-size:8px;letter-spacing:2px;text-align:right;margin-top:-3px;color:#ddd}
+.register-header{height:116px;background:#050505;display:flex;align-items:center;justify-content:center;position:relative;border-bottom:1px solid #250000}
+.live{position:absolute;right:14px;top:22px;border:1px solid #ff3434;border-radius:32px;background:linear-gradient(#ff1c1c,#a90000);color:#fff;font-size:17px;font-weight:bold;padding:13px 21px}
+.register-bg,.lobby-bg{min-height:calc(100vh - 116px);background-color:#510000;background-image:radial-gradient(ellipse at 12% 50%,#730800 0,transparent 43%),linear-gradient(72deg,transparent 0 7%,#9b790d44 7.2%,transparent 7.6%,transparent 10%,#9b790d33 10.2%,transparent 10.6%)}
+.register{max-width:900px;margin:auto;padding:12px 18px 28px}
+.formrow{display:grid;grid-template-columns:minmax(125px,34%) minmax(0,1fr);align-items:center;gap:12px;margin:11px 0 17px}
+.formrow>label{font-size:clamp(15px,3.5vw,24px);line-height:1.08;letter-spacing:.2px}
+.req{color:#ff7373}
+.field{height:57px;width:100%;min-width:0;border:3px solid #c6c6c6;border-radius:10px;background:#fff;color:#555;padding:0 22px;font-size:clamp(15px,3.2vw,22px);box-shadow:inset 0 1px 3px #999}
+.field:focus{outline:2px solid #0aa8e8;border-color:#eee}
+.phone{display:flex;min-width:0}.prefix{height:57px;background:#ffb000;color:#111;border:2px solid #d9a000;border-radius:8px 0 0 8px;padding:0 13px;font-size:20px}.phone .field{border-radius:0 9px 9px 0;padding-left:16px}
+.referral{display:grid;grid-template-columns:minmax(125px,34%) 1fr;gap:12px;font-size:clamp(15px,3.5vw,23px);margin:18px 0 25px}
+.rule{border:0;border-top:2px solid #eee;margin:18px 0 15px}.subhead{font-size:clamp(18px,3.8vw,25px);font-weight:bold;margin:0 0 18px}
+.captcha-line{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.captcha-img{width:clamp(155px,36vw,255px);height:52px;background:#050505;border:1px solid white;border-radius:7px;display:grid;place-items:center;color:#5f9bff;font-family:Georgia,serif;font-size:34px;font-style:italic;letter-spacing:4px;text-shadow:2px 1px #00f,-2px 0 #13a53c;transform:skew(-4deg)}
+.refresh-captcha{height:52px;width:58px;border:0;border-radius:9px;background:#ffa900;color:#fff;font-size:28px;font-weight:bold}
+.checks{margin:21px 0 14px;font-size:clamp(14px,3.2vw,21px);line-height:1.2}.checks label{display:block;margin:8px 0}.checks input{width:22px;height:22px;vertical-align:middle;accent-color:#0789ff}
+.submit{width:100%;border:1px solid #ffd54a;border-radius:8px;background:linear-gradient(#ffcf00,#f4a900);color:#171000;font-weight:900;font-size:20px;padding:15px;box-shadow:0 3px 0 #8a4b00}
+.demo-note{text-align:center;color:#ffd6a0;font-size:11px;line-height:1.5;margin-top:12px}
+/* LOBBY HEADER */
+.lobby-header{height:140px;background:#050505;display:flex;align-items:center;padding:12px 5%;gap:22px;position:relative;z-index:5}
+.hamb{width:42px;height:44px;background:transparent;border:0;color:white;font-size:0;display:flex;flex-direction:column;justify-content:center;gap:7px;padding:4px}
+.hamb span{height:4px;width:39px;background:#fff;border-radius:2px;display:block}
+.lobby-header .logo{width:270px;justify-content:flex-start}
+.deposit{margin-left:auto;background:linear-gradient(90deg,#df0000,#ff1b1b);border:1px solid #ff3434;color:#fff;font-weight:bold;font-size:20px;padding:17px 29px;border-radius:8px;min-width:170px}
+.drawer{display:block;position:fixed;inset:0 auto 0 0;width:min(64vw,360px);z-index:19;background:#970000;padding:0;overflow-y:auto;transform:translateX(-105%);transition:transform .22s ease}
+.drawer.open{transform:translateX(0)}
+.marquee{height:22px;background:#080808;color:#aaa;overflow:hidden;font-size:14px;white-space:nowrap}
+.userbar{background:linear-gradient(110deg,#f00,#c90000 65%,#ee1010);padding:30px 5%;min-height:175px;border-bottom:3px solid #e9ad00;position:relative}
+.username{font-size:clamp(22px,4vw,34px);font-weight:500;text-transform:uppercase;margin:0 0 25px}
+.balance{font-size:clamp(17px,3.3vw,25px)}.refresh-balance{position:absolute;right:5%;bottom:25px;background:#39b653;color:#fff;border:0;border-radius:8px;font-size:19px;font-weight:bold;padding:10px 14px}
+.lobby-inner{max-width:1400px;margin:auto;padding:30px 18px 50px}
+/* CATEGORY BUTTONS: fixed short height like the reference */
+.categories{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 8px;margin:0 0 22px;align-items:stretch}
+.cat{height:72px;min-width:0;border:1px solid #e8a900;border-radius:16px;background:linear-gradient(135deg,#ffe000,#ffb900);color:#080808;font-weight:1000;font-style:italic;font-size:clamp(11px,2.1vw,20px);display:flex;align-items:center;justify-content:center;gap:7px;padding:5px 4px;line-height:1.02;box-shadow:0 3px 0 #8d5500;cursor:pointer;text-align:center}
+.cat .ico{font-size:clamp(17px,2.7vw,27px);font-style:normal;flex-shrink:0}
+.cat.selected{outline:2px solid #fff2a3;filter:brightness(1.08)}
+.search{width:100%;height:58px;border:0;border-radius:9px;background:#fff;text-align:center;font-size:22px;color:#333;padding:10px;margin:0 0 34px}
+.promo-grid{display:grid;grid-template-columns:1.04fr .96fr;gap:25px;margin-bottom:26px}
+.promo{min-height:390px;border:1px solid #ffdc00;border-radius:36px;background:linear-gradient(135deg,#e00000,#a90000 48%,#f00000);padding:20px 17px;box-shadow:inset 0 0 0 2px #ffb90066;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.promo-title{font-size:16px;font-weight:bold;line-height:1.5;margin-bottom:20px}.yellow-link{display:block;text-align:center;border:0;border-radius:35px;background:linear-gradient(#ffdf00,#ffb800);padding:13px 10px;color:#080808;font-size:22px;font-weight:bold;text-decoration:none;margin:4px 0 20px}
+.promo label{font-size:19px;margin:0 0 8px}.promo select{height:49px;width:100%;border:1px solid #aaa;border-radius:30px;padding:0 15px;font-size:17px;background:#eee;color:#111}
+.copybtn{align-self:flex-start;background:linear-gradient(#ffe000,#ffb900);border:0;border-radius:25px;padding:11px 20px;font-size:18px;font-weight:bold;margin-top:18px;color:#111}
+.qr-placeholder{background:#fff;color:#111;border-radius:10px;width:88%;height:250px;margin:0 auto 18px;display:grid;place-items:center;text-align:center;padding:15px;border:8px solid #fff;outline:1px solid #ddd}
+.qr-placeholder img{max-width:100%;max-height:100%;object-fit:contain}.qr-placeholder .qr-fallback{font-size:16px;line-height:1.5}.qr-fallback b{font-size:65px;display:block}
+.qr-caption{text-align:center;font-size:21px;line-height:1.4}
+.banner-placeholder{width:100%;height:108px;border:2px dashed #ffd500;background:linear-gradient(90deg,#32112c,#60265c,#27122c);display:grid;place-items:center;text-align:center;color:#ffe18a;font-weight:bold;letter-spacing:1px;padding:18px;margin:24px 0 40px}
+.section-title{display:flex;align-items:center;gap:18px;font-weight:bold;font-size:22px;margin:26px 0 18px}.section-title:after{content:"";height:6px;background:#aaa;flex:1}
+/* ADD / REMOVE CARDS IN THE GAME_ITEMS ARRAY IN JAVASCRIPT */
+.game-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.game-card{height:145px;position:relative;overflow:hidden;border:1px solid #d5a900;border-radius:14px;background:linear-gradient(135deg,#251329,#771018);display:block;text-decoration:none;color:#ffe28a}
+.game-card img{width:100%;height:100%;object-fit:cover;display:block}
+.game-card .image-fallback{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:12px;background:linear-gradient(135deg,#26152b,#751016);font-size:17px;font-weight:bold}
+.game-card .card-label{position:absolute;bottom:0;left:0;right:0;padding:7px 10px;text-align:center;background:#000b;color:#fff;font-size:12px;font-weight:bold}
+.info-text{font-size:13px;line-height:1.6;color:#f2caca;margin:24px 0}
+.foot{background:#050505;text-align:center;padding:25px 12px;color:#aaa;font-size:12px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;background:#ffcf00;color:#111;font-weight:bold;padding:12px 18px;border-radius:9px;transition:.2s;z-index:20;max-width:90%;text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:650px){
+ .lobby-header{height:140px;padding:10px 5%;gap:14px}.lobby-header .logo-slot{width:auto;flex:1;max-width:138px;height:42px}
+ .deposit{font-size:17px;padding:17px 16px;min-width:0}.hamb{width:42px}.hamb span{width:39px}
+ .drawer{top:140px}
+ .userbar{padding:32px 5%;min-height:175px}.username{margin-bottom:25px}.refresh-balance{right:5%;bottom:25px;padding:9px 12px;font-size:16px}
+ .lobby-inner{padding:30px 18px 45px}.categories{gap:12px 7px;margin-bottom:22px}.cat{height:72px;border-radius:16px;font-size:clamp(10px,2.25vw,16px);gap:4px;padding:4px 2px}.cat .ico{font-size:clamp(16px,3.4vw,23px)}
+ .search{height:58px;font-size:22px;margin-bottom:34px}
+ .promo-grid{gap:25px}.promo{min-height:390px;padding:15px 12px;border-radius:36px}.promo-title{font-size:clamp(12px,2.6vw,16px)}.yellow-link{font-size:clamp(14px,3.1vw,20px);padding:13px 5px}.promo label{font-size:clamp(14px,2.7vw,18px)}.promo select{font-size:clamp(12px,2.5vw,16px)}.copybtn{font-size:16px;padding:10px 16px}.qr-placeholder{height:250px;width:95%}.qr-caption{font-size:clamp(15px,3vw,20px)}
+ .banner-placeholder{height:108px;margin:24px 0 40px}.game-card{height:130px}
+}
+@media(max-width:390px){
+ .lobby-header{gap:8px;padding:8px 12px}.lobby-header .logo-slot{max-width:138px}.deposit{font-size:14px;padding:15px 10px}
+ .lobby-inner{padding-left:12px;padding-right:12px}.categories{gap:10px 5px}.cat{font-size:10px}.cat .ico{font-size:15px}
+ .promo-grid{gap:12px}.promo{min-height:330px;padding:12px 9px}.promo-title{font-size:12px}.yellow-link{font-size:14px}.promo label{font-size:14px}.promo select{font-size:12px}.copybtn{font-size:14px;padding:9px 13px}.qr-placeholder{height:205px}.qr-caption{font-size:14px}.game-card{height:112px}
+}
+
+/* REFERENCE-MATCH OVERRIDES: proportions tuned for a 390px-wide phone */
+/* FIX MENU DRAWER: every item occupies one full row, matching the reference */
+.drawer{display:block!important;position:fixed!important;top:0!important;bottom:0!important;left:0!important;right:auto!important;width:min(64vw,360px)!important;height:100dvh!important;max-width:360px;overflow-y:auto!important;z-index:30!important;padding:0!important;gap:0!important;flex-wrap:nowrap!important;background:#970000!important;transform:translateX(-105%);transition:transform .22s ease}
+.drawer.open{transform:translateX(0)!important}
+.drawer>*{display:flex;position:relative;float:none;width:100%;max-width:none;flex:0 0 auto;margin:0;border-radius:0}
+.drawer .drawer-top{height:64px;align-items:center;background:#202020;padding:8px 14px;gap:12px}
+.drawer .drawer-feature{height:58px;display:block;padding:10px 14px;background:linear-gradient(90deg,#d90000,#850000);border-bottom:2px solid #777}
+.drawer .drawer-feature button{height:38px;width:100%;display:block}
+.drawer .drawer-link{height:52px;display:flex!important;align-items:center;justify-content:flex-start;box-sizing:border-box;padding:0 15px;white-space:nowrap}
+.drawer-backdrop{z-index:29!important}
+
+.drawer-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:18}
+.drawer-backdrop.open{display:block}
+.drawer{display:block;position:fixed;top:0;bottom:0;left:0;width:min(64vw,360px);height:100dvh;overflow-y:auto;z-index:19;background:#970000;border-right:1px solid #3a0000;transform:translateX(-105%);transition:transform .22s ease;padding:0;gap:0}
+.drawer.open{transform:translateX(0)}
+.drawer-top{height:64px;background:#202020;display:flex;align-items:center;padding:8px 14px;gap:12px}
+.drawer-live{height:38px;flex:1;border:1px solid #f4d000;border-radius:25px;background:linear-gradient(#f00000,#a90000);color:#fff;font-weight:bold;font-size:16px}
+.drawer-close{width:32px;height:40px;border:0;background:transparent;color:#fff;font-size:42px;line-height:1}
+.drawer-feature{height:58px;padding:10px 14px;background:linear-gradient(90deg,#d90000,#850000);border-bottom:2px solid #777}
+.drawer-feature button{height:38px;width:100%;border:1px solid #c90000;border-radius:14px;background:#050505;color:#fff;font-weight:bold;font-size:15px}
+.drawer-link{height:52px;display:flex;align-items:center;gap:15px;padding:0 15px;color:#fff;text-decoration:none;font-size:18px;background:linear-gradient(90deg,#f00000,#970000 78%,#610000);border-top:1px solid #ff4242;border-bottom:2px solid #222;white-space:nowrap}
+.drawer-link span{width:24px;text-align:center;font-size:27px;font-weight:bold}
+.drawer-link i{margin-left:auto;color:#ffd000;font-size:14px;font-style:normal}
+.drawer-link b{margin-left:auto;background:#d90000;border-radius:3px;padding:3px 7px;font-size:12px}
+@media(max-width:650px){
+ .lobby-header{height:76px;padding:7px 14px;gap:10px}
+ .lobby-header .logo-slot{width:auto;max-width:138px;flex:1;height:42px}
+ .hamb{width:36px;height:34px;gap:5px;padding:3px}
+ .hamb span{width:37px;height:3px}
+ .deposit{min-width:96px;font-size:14px;padding:11px 12px;border-radius:7px}
+ .drawer{top:0;width:64vw;max-width:360px;height:100dvh}
+ .drawer-top{height:64px;padding:8px 12px;gap:8px}
+ .drawer-live{height:36px;font-size:14px}
+ .drawer-close{font-size:38px;width:28px}
+ .drawer-feature{height:58px;padding:10px 14px}
+ .drawer-feature button{height:38px;font-size:14px}
+ .drawer-link{height:52px;font-size:17px;padding:0 14px;gap:13px}
+ .drawer-link span{font-size:25px}
+ .marquee{height:16px;font-size:12px}
+ .userbar{min-height:96px;padding:17px 20px}
+ .username{font-size:20px;margin:0 0 15px}
+ .balance{font-size:16px}
+ .refresh-balance{right:20px;bottom:13px;font-size:14px;padding:7px 10px;border-radius:6px}
+ .lobby-inner{padding:16px 10px 30px}
+ .categories{gap:7px 4px;margin-bottom:12px}
+ .cat{height:40px;border-radius:9px;font-size:10px;gap:3px;padding:3px 2px;box-shadow:0 2px 0 #8d5500}
+ .cat .ico{font-size:15px}
+ .search{height:33px;font-size:17px;border-radius:6px;margin-bottom:22px;padding:5px}
+ .promo-grid{gap:14px;margin-bottom:14px}
+ .promo{min-height:220px;padding:12px 9px;border-radius:22px}
+ .promo-title{font-size:12px;line-height:1.45;margin-bottom:12px}
+ .yellow-link{font-size:14px;padding:8px 4px;margin:3px 0 12px}
+ .promo label{font-size:13px;margin-bottom:5px}
+ .promo select{height:28px;font-size:11px;padding:0 8px}
+ .copybtn{font-size:12px;padding:7px 12px;margin-top:10px}
+ .qr-placeholder{height:140px;width:94%;margin-bottom:10px;padding:8px;border-width:5px}
+ .qr-placeholder .qr-fallback{font-size:10px}.qr-placeholder .qr-fallback b{font-size:43px}
+ .qr-caption{font-size:14px}
+ .banner-placeholder{height:60px;margin:14px 0 22px;font-size:11px}
+ .section-title{font-size:15px;gap:10px;margin:18px 0 10px}
+ .section-title:after{height:4px}
+ .game-grid{gap:8px}
+ .game-card{height:82px;border-radius:8px}
+ .game-card .card-label{font-size:10px;padding:4px}
+ .info-text{font-size:11px}
+}
+
+
+/* CYBERPUNK SKIN — warna dan efek saja; ukuran, susunan, serta fungsi layout dipertahankan */
+:root{--black:#03030a;--red:#a900ff;--red2:#4c16b8;--wine:#09051d;--yellow:#ffd21a;--yellow2:#ffb000;--white:#f7f4ff;--line:#00eaff}
+body{background:#03030a;color:#f7f4ff}
+.register-header,.lobby-header{background:linear-gradient(110deg,#05040d,#080617 55%,#03030a);border-bottom:1px solid #762bff;box-shadow:0 3px 22px #7b22ff55}
+.register-bg,.lobby-bg{background-color:#05040e;background-image:radial-gradient(ellipse at 12% 16%,#4b0b8b55 0,transparent 38%),radial-gradient(ellipse at 88% 70%,#003f7655 0,transparent 42%),linear-gradient(135deg,#05040e,#08051b 55%,#03030a)}
+.live,.drawer-live{background:linear-gradient(110deg,#8c16ff,#e000d8 55%,#173cff);border:1px solid #00eaff;color:#fff;box-shadow:0 0 12px #a020ff88,inset 0 0 9px #ffffff22}
+.field{border-color:#8a69c7;box-shadow:inset 0 1px 4px #888,0 0 7px #7a28ff44}
+.field:focus{outline:2px solid #00eaff;border-color:#00eaff;box-shadow:0 0 12px #00dfff88}
+.prefix{background:linear-gradient(135deg,#ffd51a,#ff9d00);border-color:#ffcf26}
+.rule{border-top-color:#8d51ff}.subhead{color:#f5eaff;text-shadow:0 0 10px #9a37ff66}
+.submit{background:linear-gradient(110deg,#ffd21a,#ff9b00);border-color:#fff078;box-shadow:0 0 13px #ffb00066,0 3px 0 #754100}
+.demo-note{color:#c8b4ff}
+.deposit{background:linear-gradient(110deg,#a600ff,#e000d8 55%,#164dff);border:1px solid #00eaff;box-shadow:0 0 14px #9b20ff88,inset 0 0 10px #fff2}
+.hamb span{background:linear-gradient(90deg,#fff,#00eaff);box-shadow:0 0 8px #00dfff}
+.drawer{background:linear-gradient(180deg,#100523,#09091c 65%,#050711);border-right:1px solid #00dfff;box-shadow:8px 0 28px #7500ff55}
+.drawer-top{background:linear-gradient(90deg,#171126,#090914)!important;border-bottom:1px solid #7c35ff}
+.drawer-feature{background:linear-gradient(100deg,#32105f,#10102d)!important;border-bottom:1px solid #00dfff!important}
+.drawer-feature button{background:linear-gradient(90deg,#05050c,#17102c)!important;border:1px solid #a12cff!important;box-shadow:0 0 10px #7d22ff55;color:#fff!important}
+.drawer-link{background:linear-gradient(100deg,#241044,#11102b 70%,#080b1c)!important;border-top:1px solid #8c37ff!important;border-bottom:1px solid #00c9e8!important;color:#f8f3ff!important}
+.drawer-link span,.drawer-link i{color:#00eaff!important;text-shadow:0 0 8px #00dfff88}
+.drawer-link b{background:#d000dc!important;color:white;box-shadow:0 0 8px #ed00ff66}
+.drawer-backdrop{background:rgba(1,0,12,.76)!important}
+.marquee{background:#05040d;color:#d9caff;border-top:1px solid #6d27cf;border-bottom:1px solid #00cbe8}
+.userbar{background:linear-gradient(105deg,#16062f 0%,#24105b 45%,#061d43 100%);border-bottom:3px solid #00dfff;box-shadow:inset 0 0 25px #9d22ff55,0 5px 18px #5b00ff44}
+.username{ text-shadow:0 0 12px #bd55ff88 }
+.balance b{color:#ffd21a;text-shadow:0 0 10px #ffb00055}
+.refresh-balance{background:linear-gradient(100deg,#00bfa5,#00eaff);color:#031018;box-shadow:0 0 13px #00eaff77}
+.cat{background:linear-gradient(145deg,#171329,#090a18 60%,#15102b);border:1px solid #00dfff;color:#f8f4ff;box-shadow:0 0 8px #00cfff55,inset 0 0 12px #7b28ff33}
+.cat .ico{color:#ffd21a;text-shadow:0 0 8px #ffbd00}
+.cat.selected{outline:2px solid #ffcf24;filter:brightness(1.2);box-shadow:0 0 14px #ffbb00aa,0 0 9px #00dfff66}
+.search{background:linear-gradient(100deg,#0b0a19,#17102c);border:1px solid #a12cff;color:#fff;box-shadow:0 0 12px #822dff55}
+.search::placeholder{color:#c9bedf}
+.promo{background:linear-gradient(145deg,#17072f,#080d24 55%,#13082b);border:1px solid #00dfff;box-shadow:inset 0 0 18px #8b22ff55,0 0 13px #5e20ff55}
+.promo-title{color:#f7f0ff;text-shadow:0 0 9px #a43dff66}
+.yellow-link,.copybtn{background:linear-gradient(110deg,#ffe52c,#ffad00);color:#120b00;box-shadow:0 0 12px #ffb00077,inset 0 0 5px #fff8}
+.promo select{background:#100d20;color:#f7f2ff;border:1px solid #a02bff;box-shadow:0 0 8px #7d22ff55}
+.qr-placeholder{border-color:#fff;outline:1px solid #00dfff;box-shadow:0 0 13px #00dfff55}
+.banner-placeholder{background:linear-gradient(100deg,#17072b,#071c36,#240b38);border:2px dashed #00dfff;color:#ffe17b;box-shadow:inset 0 0 18px #872aff55,0 0 12px #00cfff44}
+.section-title{color:#f5edff;text-shadow:0 0 9px #8e31ff66}.section-title:after{background:linear-gradient(90deg,#b21cff,#00dfff)}
+.game-card{background:linear-gradient(135deg,#160d2c,#061a30);border-color:#00dfff;box-shadow:0 0 9px #7225ff55}
+.game-card .image-fallback{background:linear-gradient(135deg,#160d2c,#071a30);color:#ffe27a}
+.game-card .card-label{background:linear-gradient(90deg,#120b22dd,#071a2ddd);border-top:1px solid #00dfff;color:#fff}
+/* efek halus agar terasa hidup tanpa mengubah ukuran elemen */
+@keyframes neonBreath{0%,100%{filter:brightness(1);box-shadow:0 0 8px #7628ff44}50%{filter:brightness(1.13);box-shadow:0 0 15px #00dfff66}}
+.deposit,.cat.selected,.promo,.banner-placeholder{animation:neonBreath 4.5s ease-in-out infinite}
+button,a,.cat,.game-card{transition:filter .18s ease,box-shadow .18s ease,transform .18s ease}
+button:hover,.cat:hover,.game-card:hover{filter:brightness(1.16);box-shadow:0 0 15px #00dfff88}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+
+
+/* MAFIA LUXURY SKIN — mempertahankan ukuran, posisi, struktur, dan fungsi layout */
+:root{
+ --black:#050403;--red:#8d0908;--red2:#4a0808;--wine:#100907;
+ --yellow:#e9b84f;--yellow2:#a96a20;--white:#f6edda;--line:#d69a37;
+}
+html,body{background:#050403;color:#f5eddf}
+body{font-family:Georgia,'Times New Roman',serif;background:radial-gradient(ellipse at 50% 0%,#25170d 0,#090705 48%,#030303 100%)}
+.register-header,.lobby-header{
+ background:linear-gradient(110deg,#050403,#15100a 48%,#050403);
+ border-bottom:1px solid #b78332;box-shadow:0 3px 20px #000,inset 0 -1px 0 #f1c46b44
+}
+.logo-slot{
+ background:linear-gradient(135deg,#080706,#17100a 50%,#050403);
+ border:1px solid #b98536;box-shadow:inset 0 0 0 2px #4b3218,0 0 10px #c28a3155;
+ position:relative
+}
+.logo-slot:before,.logo-slot:after{content:"✦";position:absolute;color:#e5b75d;font-size:12px;line-height:1;text-shadow:0 0 7px #ffcb66}
+.logo-slot:before{left:5px;top:3px}.logo-slot:after{right:5px;bottom:3px}
+.live,.drawer-live{
+ background:linear-gradient(180deg,#8e1712,#390705);border:1px solid #e4b85c;color:#fff3d8;
+ box-shadow:inset 0 1px 0 #ffdf9a55,0 0 10px #b77a2b44
+}
+.register-bg,.lobby-bg{
+ background-color:#080604;
+ background-image:radial-gradient(ellipse at 12% 18%,#4b241333 0,transparent 38%),radial-gradient(ellipse at 88% 75%,#6b160f22 0,transparent 42%),linear-gradient(135deg,#080705,#100b08 55%,#050403)
+}
+.field{border:2px solid #b68a4a;box-shadow:inset 0 1px 4px #777,0 0 6px #c18c3b22}
+.field:focus{outline:2px solid #e6bd70;border-color:#e6bd70;box-shadow:0 0 10px #d69a3788}
+.prefix{background:linear-gradient(135deg,#e8c16c,#a66d25);border-color:#d7a74e;color:#211507}
+.rule{border-top-color:#9b7138}.subhead{color:#f2d49a;text-shadow:0 1px 8px #b47b2c55}
+.submit{background:linear-gradient(180deg,#f1d18a,#b77a2c 55%,#754314);border:1px solid #ffe2a0;color:#1c1005;box-shadow:inset 0 1px 0 #fff4d1,0 3px 0 #4a2a0d,0 0 12px #d69a3744}
+.demo-note{color:#d6bd91}
+.deposit{
+ background:linear-gradient(180deg,#a51b14,#5a0908 55%,#310605);border:1px solid #e2b65d;color:#fff0cf;
+ box-shadow:inset 0 1px 0 #ffdf9a66,0 0 12px #b77a2b44
+}
+.hamb span{background:linear-gradient(90deg,#fff0c8,#d6a64e);box-shadow:0 0 7px #d69a3777}
+.drawer{background:linear-gradient(180deg,#0b0806,#160d08 50%,#050403);border-right:1px solid #c08a3b;box-shadow:8px 0 26px #000,inset -1px 0 0 #f4c66b44}
+.drawer-top{background:linear-gradient(90deg,#1b120b,#080605)!important;border-bottom:1px solid #9b6c2d}
+.drawer-close{color:#f4e4c4!important}
+.drawer-feature{background:linear-gradient(90deg,#4b0a08,#170806)!important;border-bottom:1px solid #9a6b2d!important}
+.drawer-feature button{background:linear-gradient(180deg,#090706,#21150c)!important;border:1px solid #c18d42!important;color:#f4dfb2!important;box-shadow:inset 0 1px 0 #ffe0a044,0 0 8px #c18d4233}
+.drawer-link{background:linear-gradient(100deg,#4a0b09,#1b0c08 58%,#080605)!important;border-top:1px solid #a36c32!important;border-bottom:1px solid #050403!important;color:#f5e9d4!important}
+.drawer-link span,.drawer-link i{color:#e8bd68!important;text-shadow:0 0 7px #d69a3766}
+.drawer-link b{background:linear-gradient(180deg,#b3261d,#5d0b08)!important;color:#fff0d2;box-shadow:0 0 7px #c58b3d44}
+.drawer-backdrop{background:rgba(0,0,0,.78)!important}
+.marquee{background:#070605;color:#d8c49f;border-top:1px solid #765126;border-bottom:1px solid #765126}
+.userbar{
+ background:linear-gradient(105deg,#090705 0%,#24120b 48%,#100806 100%);
+ border:1px solid #a97932;border-bottom:3px solid #d3a34d;
+ box-shadow:inset 0 0 25px #b2762c33,0 5px 18px #000
+}
+.username{font-family:Georgia,serif;color:#f1d69c;text-shadow:0 1px 10px #d69a3766}
+.balance b{color:#f0c76f;text-shadow:0 0 8px #d69a3755}
+.refresh-balance{background:linear-gradient(180deg,#e3bd6c,#9a6426);color:#1b1007;border:1px solid #f5d995;box-shadow:inset 0 1px 0 #fff1c1,0 0 10px #c18a3b44}
+.cat{
+ background:linear-gradient(145deg,#21170e,#080706 62%,#35120d);border:1px solid #c18b3c;color:#f5e7c8;
+ box-shadow:inset 0 1px 0 #ffe1a044,0 2px 0 #39230e,0 0 8px #bd843633
+}
+.cat .ico{color:#e9bd62;text-shadow:0 0 7px #d69a3766}
+.cat.selected{outline:1px solid #f5d58c;filter:brightness(1.16);box-shadow:0 0 13px #d69a3788,inset 0 0 12px #e6b85a22}
+.search{background:linear-gradient(100deg,#080706,#1a120b);border:1px solid #bd8738;color:#f5ead7;box-shadow:inset 0 1px 0 #ffffff12,0 0 9px #bd873833}
+.search::placeholder{color:#c6b18e}
+.promo{background:linear-gradient(145deg,#210c09,#080706 55%,#2b130b);border:1px solid #d0a04c;box-shadow:inset 0 0 0 2px #70491f66,inset 0 0 20px #a56b2833,0 0 12px #000}
+.promo-title{color:#f2e3c6;text-shadow:0 1px 8px #d69a3744}
+.yellow-link,.copybtn{background:linear-gradient(180deg,#f4d78e,#c28a37 55%,#8b551d);color:#211306;border:1px solid #ffe5a5;box-shadow:inset 0 1px 0 #fff6d8,0 2px 0 #5b3514,0 0 9px #c18a3b55}
+.promo select{background:linear-gradient(100deg,#100b08,#24160e);color:#f5ead7;border:1px solid #bd8738;box-shadow:0 0 7px #bd873833}
+.qr-placeholder{border-color:#f4e3c1;outline:1px solid #c18a3b;box-shadow:0 0 12px #000}
+.banner-placeholder{background:linear-gradient(100deg,#160b08,#2a160b,#100806);border:1px dashed #d4a24c;color:#f0d08a;box-shadow:inset 0 0 18px #b2762c33,0 0 10px #000}
+.section-title{color:#f0d9a7;text-shadow:0 1px 8px #b9823455}.section-title:after{background:linear-gradient(90deg,#6d3818,#e2b65d,#6d3818)}
+.game-card{background:linear-gradient(135deg,#160d09,#32120d);border:1px solid #bd8738;box-shadow:0 0 9px #000,inset 0 0 10px #c18a3b22}
+.game-card .image-fallback{background:linear-gradient(135deg,#160d09,#32120d);color:#f0d08a}
+.game-card .card-label{background:linear-gradient(90deg,#090706ee,#2a100bee);border-top:1px solid #bd8738;color:#f6ead2}
+.info-text{color:#d8c6a5}.foot{background:#050403;color:#9e8a6a;border-top:1px solid #65451f}
+.toast{background:linear-gradient(180deg,#f0d18b,#bd8435);color:#211306;border:1px solid #ffe4a3}
+button,a,.cat,.game-card{transition:filter .18s ease,box-shadow .18s ease,transform .18s ease}
+button:hover,.cat:hover,.game-card:hover{filter:brightness(1.13);box-shadow:0 0 13px #c18a3b77}
+@keyframes goldGlimmer{0%,100%{filter:brightness(1)}50%{filter:brightness(1.12)}}
+.deposit,.cat.selected,.promo,.banner-placeholder{animation:goldGlimmer 5s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+
+
+/* COWBOY WESTERN SKIN — hanya palet warna, tekstur visual, dan aksen; layout/ukuran/fungsi tetap */
+:root{
+ --black:#17100b;--red:#6f2c18;--red2:#3e1b12;--wine:#21140e;
+ --yellow:#d6a653;--yellow2:#95632f;--white:#f2e5cb;--line:#bd8b45;
+}
+html,body{background:#17100b;color:#f2e5cb}
+body{font-family:Georgia,'Times New Roman',serif;background:radial-gradient(ellipse at 50% 0%,#49301d 0,#21170f 42%,#100c08 100%)}
+.register-header,.lobby-header{background:linear-gradient(110deg,#100c08,#2a1b12 48%,#100c08);border-bottom:1px solid #bd8b45;box-shadow:0 3px 18px #000,inset 0 -1px 0 #f1d49a33}
+.register-bg,.lobby-bg{background-color:#21150e;background-image:radial-gradient(ellipse at 12% 18%,#75451f55 0,transparent 38%),radial-gradient(ellipse at 88% 76%,#5a281a44 0,transparent 42%),repeating-linear-gradient(92deg,transparent 0 34px,#b47a3520 35px,#120b0820 39px,transparent 42px),linear-gradient(135deg,#26180f,#1a100b 58%,#100c08)}
+.live,.drawer-live{background:linear-gradient(110deg,#8b3b20,#5d2417 55%,#32160f);border:1px solid #e0b66d;color:#fff1d7;box-shadow:0 0 10px #b77b3544,inset 0 0 8px #fff2}
+.field{border-color:#b28a59;box-shadow:inset 0 1px 4px #8d775c,0 0 5px #0005}
+.field:focus{outline:2px solid #d9ad63;border-color:#f0d49c;box-shadow:0 0 10px #d6a65366}
+.prefix{background:linear-gradient(135deg,#d8ad61,#a76b32);border-color:#c18c43;color:#20150d}
+.rule{border-top-color:#b98a4c}.subhead{color:#f2e1c2;text-shadow:0 1px 5px #000}
+.submit{background:linear-gradient(110deg,#e0bd76,#b47a36);border-color:#f3d99f;color:#24170d;box-shadow:0 0 10px #b77b3544,0 3px 0 #57351b}
+.demo-note{color:#d7bd94}
+.deposit{background:linear-gradient(110deg,#8b3a20,#642719 55%,#3e1c12);border:1px solid #dfb66d;color:#fff0d3;box-shadow:0 0 11px #0008,inset 0 0 8px #fff2}
+.hamb span{background:linear-gradient(90deg,#f3e5c9,#d6a653);box-shadow:0 0 6px #d6a65366}
+.drawer{background:linear-gradient(180deg,#3a2115,#24150e 65%,#160e09);border-right:1px solid #b98a4c;box-shadow:8px 0 25px #0009}
+.drawer-top{background:linear-gradient(90deg,#21150e,#100c08)!important;border-bottom:1px solid #9b6c37}
+.drawer-feature{background:linear-gradient(100deg,#784027,#432317)!important;border-bottom:1px solid #a97a43!important}
+.drawer-feature button{background:linear-gradient(90deg,#17100b,#352015)!important;border:1px solid #bd8b45!important;box-shadow:0 0 8px #0006;color:#f5e8d0!important}
+.drawer-link{background:linear-gradient(100deg,#6b321d,#472518 70%,#2a180f)!important;border-top:1px solid #a66e3c!important;border-bottom:1px solid #1b100a!important;color:#f3e6cf!important}
+.drawer-link span,.drawer-link i{color:#e2b86f!important;text-shadow:0 0 6px #d6a65355}
+.drawer-link b{background:#8a3c21!important;color:#fff0d2;box-shadow:0 0 6px #0006}
+.drawer-backdrop{background:rgba(8,5,3,.76)!important}
+.marquee{background:#130d08;color:#d8c19b;border-top:1px solid #6f4928;border-bottom:1px solid #9c713d}
+.userbar{background:linear-gradient(105deg,#5a2a19 0%,#75401f 45%,#321b11 100%);border-bottom:3px solid #c69a55;box-shadow:inset 0 0 22px #1a0c0788,0 5px 16px #0008}
+.username{text-shadow:0 1px 7px #1a0b06;color:#fff0d7}
+.balance b{color:#f0ca7e;text-shadow:0 0 7px #d6a65355}
+.refresh-balance{background:linear-gradient(100deg,#9a6532,#c99a52);color:#1c120b;box-shadow:0 0 9px #0006}
+.cat{background:linear-gradient(145deg,#d7ad62,#b57a37 58%,#875126);border:1px solid #f0d18c;color:#24170d;box-shadow:0 3px 0 #58351b,inset 0 0 9px #fff3}
+.cat .ico{color:#3b2112;text-shadow:0 1px 1px #f5d99c}
+.cat.selected{outline:2px solid #f4dfae;filter:brightness(1.12);box-shadow:0 0 12px #d6a65377,0 3px 0 #58351b}
+.search{background:linear-gradient(100deg,#f1e5d0,#dfc9a6);border:1px solid #a77a45;color:#24170e;box-shadow:inset 0 1px 4px #8a6b48}
+.search::placeholder{color:#786047}
+.promo{background:linear-gradient(145deg,#74371f,#3c2115 55%,#24150e);border:1px solid #d1a15b;box-shadow:inset 0 0 16px #160b0666,0 0 10px #0008}
+.promo-title{color:#f4e6cb;text-shadow:0 1px 5px #160b06}
+.yellow-link,.copybtn{background:linear-gradient(110deg,#e7c77e,#bd843e);color:#25170c;box-shadow:0 2px 6px #0008,inset 0 0 5px #fff5}
+.promo select{background:#eadcc4;color:#2c1b10;border:1px solid #a77a45;box-shadow:inset 0 1px 3px #8d775c}
+.qr-placeholder{border-color:#f1e4cf;outline:1px solid #c99b57;box-shadow:0 0 10px #0007}
+.banner-placeholder{background:repeating-linear-gradient(90deg,#3b2418 0 18px,#442a1b 18px 36px);border:2px dashed #d0a45e;color:#f0d49a;box-shadow:inset 0 0 16px #100904,0 0 9px #0008}
+.section-title{color:#f2e5cb;text-shadow:0 1px 5px #000}.section-title:after{background:linear-gradient(90deg,#8c552e,#d3aa68)}
+.game-card{background:linear-gradient(135deg,#3a2418,#6d321d);border-color:#c69a55;box-shadow:0 0 8px #0007}
+.game-card .image-fallback{background:linear-gradient(135deg,#392317,#704027);color:#f0d49a}
+.game-card .card-label{background:linear-gradient(90deg,#1a100ddd,#3c2115dd);border-top:1px solid #bd8b45;color:#f4e6cf}
+.info-text{color:#d8c4a5}
+.foot{background:#100b07;color:#bba486;border-top:1px solid #684526}
+.toast{background:#e0bd76;color:#24170d}
+@keyframes westernGlow{0%,100%{filter:brightness(1);box-shadow:0 0 6px #0005}50%{filter:brightness(1.08);box-shadow:0 0 13px #d6a65355}}
+.deposit,.cat.selected,.promo,.banner-placeholder{animation:westernGlow 5.5s ease-in-out infinite}
+button,a,.cat,.game-card{transition:filter .18s ease,box-shadow .18s ease,transform .18s ease}
+button:hover,.cat:hover,.game-card:hover{filter:brightness(1.12);box-shadow:0 0 12px #d6a65377}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+</style>
+</head>
+<body>
+<!-- HALAMAN PENDAFTARAN DEMO -->
+<section id="registerPage" class="page active">
+ <header class="register-header">
+  <div class="logo-slot">
+  <img src="judul.png" alt="koboy55">
+</div>
+  <button class="live" onclick="notify('Live chat belum dihubungkan pada demo')">Live Chat</button>
+ </header>
+ <main class="register-bg"><form class="register" id="registerForm">
+  <div class="formrow"><label>Username <b class="req">*</b></label><input class="field" id="regUsername" placeholder="Username" required minlength="3"></div>
+  <div class="formrow"><label>Password <b class="req">*</b></label><input class="field" type="password" placeholder="Password demo" required></div>
+  <div class="formrow"><label>Konfirmasi<br>Password <b class="req">*</b></label><input class="field" type="password" placeholder="Konfirmasi Password" required></div>
+  <div class="formrow"><label>Email <b class="req">*</b></label><input class="field" type="email" placeholder="Alamat email demo" required></div>
+  <div class="formrow"><label>No. Telp/HP <b class="req">*</b></label><div class="phone"><button type="button" class="prefix">+62</button><input class="field" type="tel" placeholder="Nomor telepon demo" required></div></div>
+  <div class="referral"><span>Referral</span><span>-</span></div>
+  <hr class="rule"><h2 class="subhead">Pengaturan Bank</h2><hr class="rule">
+  <div class="formrow"><label>Nama Bank <b class="req">*</b></label><select class="field" required><option value="">Pilih bank demo</option><option>ALLO BANK</option><option>BCA</option><option>BRI</option><option>BNI</option><option>Mandiri</option><option>Bank lainnya</option></select></div>
+  <div class="formrow"><label>Nama Rekening <b class="req">*</b></label><input class="field" placeholder="Nama rekening demo" required></div>
+  <div class="formrow"><label>Nomor Rekening <b class="req">*</b></label><input class="field" inputmode="numeric" placeholder="Nomor rekening demo" required></div>
+  <div class="formrow"><label>Captcha <b class="req">*</b></label><div class="captcha-line"><div class="captcha-img" id="captcha">7ac9t</div><button class="refresh-captcha" type="button" onclick="newCaptcha()">⟳</button></div></div>
+  <div class="formrow"><label></label><input class="field" id="captchaInput" placeholder="Captcha" required></div>
+  <div class="checks"><label><input type="checkbox" checked> Saya bersedia menerima email promosi</label><label><input type="checkbox" required> Saya setuju dengan peraturan yang berlaku</label></div>
+  <button class="submit" type="submit">DAFTAR</button>
+  <div class="demo-note">DEMO FRONT-END — jangan masukkan kata sandi, nomor telepon, atau data rekening asli. Data formulir tidak dikirim ke server.</div>
+ </form></main>
+</section>
+
+<!-- HALAMAN LOBBY DEMO -->
+<section id="lobbyPage" class="page">
+ <header class="lobby-header">
+  <button class="hamb" onclick="toggleMenu()" aria-label="Buka menu"><span></span><span></span><span></span></button>
+  <div class="logo-slot">
+  <img src="judul.png" alt="koboy55">
+</div>
+  <button class="deposit" onclick="goTo('deposit')">DEPOSIT</button>
+ </header>
+ <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeMenu()"></div>
+ <nav class="drawer" id="drawer" aria-label="Menu utama">
+  <div class="drawer-top"><button class="drawer-live" onclick="goTo('livechat')">Live Chat</button><button class="drawer-close" onclick="closeMenu()" aria-label="Tutup menu">×</button></div>
+  <div class="drawer-feature"><button onclick="goTo('prediksi')">PREDIKSI TOGEL</button></div>
+  <div class="drawer-feature"><button onclick="goTo('rtp')">RTP SLOT</button></div>
+  <a class="drawer-link active" href="#" onclick="goTo('home');return false"><span>⌂</span> Home <i>●</i></a>
+  <a class="drawer-link" href="#" onclick="goTo('deposit');return false"><span>▤↓</span> Deposit</a>
+  <a class="drawer-link" href="#" onclick="goTo('withdraw');return false"><span>▤↑</span> Withdraw</a>
+  <a class="drawer-link" href="#" onclick="goTo('history');return false"><span>◴</span> History</a>
+  <a class="drawer-link" href="#" onclick="goTo('referral');return false"><span>♟</span> Referral</a>
+  <a class="drawer-link" href="#" onclick="goTo('transaksi');return false"><span>⏵</span> Transaksi</a>
+  <a class="drawer-link" href="#" onclick="goTo('invoice');return false"><span>▤</span> Invoice</a>
+  <a class="drawer-link" href="#" onclick="goTo('memo');return false"><span>✉</span> Memo <b>52</b></a>
+  <a class="drawer-link" href="#" onclick="goTo('ubahpassword');return false"><span>◎</span> Ubah Password</a>
+  <a class="drawer-link" href="#" onclick="goTo('promosi');return false"><span>▣</span> Promosi</a>
+  <a class="drawer-link" href="#" onclick="goTo('bantuan');return false"><span>♡</span> Bantuan</a>
+ </nav>
+ <div class="marquee">Informasi: Selamat datang di halaman demo. Semua fitur hanya contoh tampilan.</div>
+ <section class="userbar"><h1 class="username" id="welcomeName">NAMA PENGGUNA</h1><div class="balance">Balance: <b>IDR. 383</b></div><button class="refresh-balance" onclick="notify('Tampilan saldo demo diperbarui')">⟳ REFRESH</button></section>
+ <main class="lobby-bg"><div class="lobby-inner">
+  <div class="categories" id="game-list">
+   <button class="cat selected" onclick="chooseCat(this,'all')"><span class="ico">☷</span> SEMUA</button>
+   <button class="cat" onclick="chooseCat(this,'casino')"><span class="ico">♟</span> CASINO</button>
+   <button class="cat" onclick="chooseCat(this,'togel')"><span class="ico">▦</span> TOGEL</button>
+   <button class="cat" onclick="chooseCat(this,'slot')"><span class="ico">🍒</span> SLOT</button>
+   <button class="cat" onclick="chooseCat(this,'sports')"><span class="ico">⚽</span> SPORTS</button>
+   <button class="cat" onclick="chooseCat(this,'stream')"><span class="ico">ϟ</span> STREAM<br>N' SPIN</button>
+   <button class="cat" onclick="chooseCat(this,'poker')"><span class="ico">♠</span> POKER</button>
+   <button class="cat" onclick="chooseCat(this,'arcade')"><span class="ico">♟</span> ARCADE</button>
+   <button class="cat" onclick="chooseCat(this,'lottery')"><span class="ico">◎</span> E-LOTTERY</button>
+  </div>
+  <input class="search" id="search" placeholder="Cari" oninput="filterGames()">
+  <section class="promo-grid">
+   <div class="promo">
+    <div class="promo-title">🏅 Pastikan Selalu Login Dengan Link Resmi Kami</div>
+    <a class="yellow-link" href="#" onclick="goTo('official');return false">kilat.io/alexis</a>
+    <label for="altLink">Pilih Link Alternatif:</label>
+    <select id="altLink"><option value="alternate">websitekamu.com</option><option value="alternate2">link-alternatif-2.com</option></select>
+    <button class="copybtn" onclick="copyAlt()">Salin Link</button>
+   </div>
+   <div class="promo">
+    <div class="qr-placeholder"><div class="qr-fallback"><b>▦</b>GANTI DENGAN GAMBAR QR KAMU</div></div>
+    <div class="qr-caption">SCAN UNTUK<br>DOWNLOAD APLIKASI</div>
+   </div>
+  </section>
+  <div class="banner-placeholder">AREA BANNER UTAMA — GANTI DENGAN GAMBAR BANNER KAMU</div>
+  <div class="section-title" id="sport">PILIH GAMBAR</div>
+  <div class="game-grid" id="gameGrid"></div>
+  <div class="section-title" id="info">INFORMASI</div>
+  <p class="info-text">Ini adalah prototipe antarmuka demo. Tidak ada taruhan, deposit, penarikan, atau pemrosesan pembayaran di halaman ini.</p>
+ </div></main>
+ <footer class="foot">© 2026 — DEMO WEBSITE</footer>
+</section>
+<div class="toast" id="toast"></div>
+<script>
+/* =========================================================
+   PENGATURAN LINK — GANTI URL DI BAGIAN INI.
+   Semua tombol hanya mengarahkan pengunjung ke URL tujuan.
+   Tidak ada pemrosesan deposit atau pembayaran di file ini.
+========================================================= */
+const LINKS = {
+  deposit: "https://websitekamu.com/deposit",
+  official: "https://websitekamu.com",
+  alternate: "https://websitekamu.com",
+  alternate2: "https://websitekamu.com",
+  semua: "https://websitekamu.com",
+  casino: "https://websitekamu.com",
+  togel: "https://websitekamu.com",
+  slot: "https://websitekamu.com",
+  sports: "https://websitekamu.com",
+  stream: "https://websitekamu.com",
+  poker: "https://websitekamu.com",
+  arcade: "https://websitekamu.com",
+  lottery: "https://websitekamu.com",
+  home: "https://websitekamu.com/home",
+  livechat: "https://websitekamu.com/livechat",
+  prediksi: "https://websitekamu.com/prediksi",
+  rtp: "https://websitekamu.com/rtp",
+  withdraw: "https://websitekamu.com/withdraw",
+  history: "https://websitekamu.com/history",
+  referral: "https://websitekamu.com/referral",
+  transaksi: "https://websitekamu.com/transaksi",
+  invoice: "https://websitekamu.com/invoice",
+  memo: "https://websitekamu.com/memo",
+  ubahpassword: "https://websitekamu.com/ubah-password",
+  promosi: "https://websitekamu.com/promosi",
+  bantuan: "https://websitekamu.com/bantuan"
+};
+
+/* TAMBAH GAMBAR/KARTU BARU DENGAN MENAMBAHKAN BARIS DI ARRAY INI.
+   image: lokasi file gambar milikmu, contoh "images/game-09.jpg"
+   url: link tujuan ketika kartu diklik.
+*/
+const GAME_ITEMS = [
+ {title:"CASINO 01",category:"casino",image:"images/casino-01.jpg",url:"casino"},
+ {title:"CASINO 02",category:"casino",image:"images/casino-02.jpg",url:"casino"},
+ {title:"TOGEL 01",category:"togel",image:"images/togel-01.jpg",url:"togel"},
+ {title:"TOGEL 02",category:"togel",image:"images/togel-02.jpg",url:"togel"},
+ {title:"SLOT 01",category:"slot",image:"images/slot-01.jpg",url:"slot"},
+ {title:"SLOT 02",category:"slot",image:"images/slot-02.jpg",url:"slot"},
+ {title:"SPORTS 01",category:"sports",image:"images/sports-01.jpg",url:"sports"},
+ {title:"SPORTS 02",category:"sports",image:"images/sports-02.jpg",url:"sports"},
+ {title:"STREAM N' SPIN 01",category:"stream",image:"images/stream-01.jpg",url:"stream"},
+ {title:"STREAM N' SPIN 02",category:"stream",image:"images/stream-02.jpg",url:"stream"},
+ {title:"POKER 01",category:"poker",image:"images/poker-01.jpg",url:"poker"},
+ {title:"POKER 02",category:"poker",image:"images/poker-02.jpg",url:"poker"},
+ {title:"ARCADE 01",category:"arcade",image:"images/arcade-01.jpg",url:"arcade"},
+ {title:"ARCADE 02",category:"arcade",image:"images/arcade-02.jpg",url:"arcade"},
+ {title:"E-LOTTERY 01",category:"lottery",image:"images/lottery-01.jpg",url:"lottery"},
+ {title:"E-LOTTERY 02",category:"lottery",image:"images/lottery-02.jpg",url:"lottery"}
+];
+
+let captchaCode="7ac9t";
+function notify(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>el.classList.remove('show'),2500)}
+function validUrl(key){const url=LINKS[key];if(!url||url.includes("websitekamu.com")){notify("Atur URL tujuan '"+key+"' pada bagian LINKS di JavaScript terlebih dahulu.");return null}return url}
+function goTo(key){const url=validUrl(key);if(url)window.location.href=url}
+function newCaptcha(){captchaCode=Math.random().toString(36).slice(2,7);document.getElementById('captcha').textContent=captchaCode}
+document.getElementById('registerForm').addEventListener('submit',function(e){
+ e.preventDefault();
+ const pw=this.querySelectorAll('input[type=password]');
+ if(pw[0].value!==pw[1].value){notify('Konfirmasi password demo belum sama.');return}
+ if(document.getElementById('captchaInput').value.trim().toLowerCase()!==captchaCode.toLowerCase()){notify('Captcha demo belum benar.');return}
+ const name=document.getElementById('regUsername').value.trim();
+ document.getElementById('welcomeName').textContent=name.toUpperCase();
+ document.getElementById('registerPage').classList.remove('active');
+ document.getElementById('lobbyPage').classList.add('active');
+ window.scrollTo(0,0);
+});
+function backToRegister(){document.getElementById('lobbyPage').classList.remove('active');document.getElementById('registerPage').classList.add('active');window.scrollTo(0,0)}
+function toggleMenu(){const d=document.getElementById('drawer'),b=document.getElementById('drawerBackdrop');d.classList.toggle('open');b.classList.toggle('open',d.classList.contains('open'))}
+function closeMenu(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawerBackdrop').classList.remove('open')}
+let activeCategory='all';
+function chooseCat(btn,key){
+ activeCategory=key;
+ document.querySelectorAll('.cat').forEach(x=>x.classList.remove('selected'));
+ btn.classList.add('selected');
+ renderGames();
+}
+function filterGames(){renderGames()}
+function copyAlt(){const key=document.getElementById('altLink').value;const url=LINKS[key];if(!url||url.includes('websitekamu.com')){notify('Atur URL alternatif pada bagian LINKS terlebih dahulu.');return}if(navigator.clipboard?.writeText){navigator.clipboard.writeText(url).then(()=>notify('Link berhasil disalin')).catch(()=>notify(url))}else notify(url)}
+function renderGames(){
+ const grid=document.getElementById('gameGrid');
+ const q=document.getElementById('search').value.toLowerCase();
+ const visible=GAME_ITEMS.filter(item=>(activeCategory==='all'||item.category===activeCategory)&&item.title.toLowerCase().includes(q));
+ grid.innerHTML=visible.map(item=>`<a class="game-card" data-title="${item.title.toLowerCase()}" href="#" onclick="goTo('${item.url}');return false"><img src="${item.image}" alt="${item.title}" onerror="this.style.display='none'"><span class="image-fallback">${item.title}<br><small>GANTI GAMBAR: ${item.image}</small></span><span class="card-label">${item.title}</span></a>`).join('');
+ if(!visible.length)grid.innerHTML='<p class="info-text">Belum ada gambar pada kategori ini. Tambahkan item di GAME_ITEMS.</p>';
+}
+renderGames();
+</script>
+</body>
+</html>
